@@ -897,7 +897,109 @@ app/settings/config.js
 
 http://localhost:3000/settings/config - It will throw error..
 
+....................................................................................
+			 				Component Driven Archiecture
+....................................................................................
 
+Layout is container, Page is mapped against route segment, which displays UI.
+
+Can Page Hold other Components?
+
+Yes
+
+G:\IBM\2024\Nov\Nextjs>npx create-next-app@latest
+√ What is your project named? ... next-components
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\next-components.
+
+Using npm.
+
+Initializing project with template: app-tw
+
+
+Installing dependencies:
+- react
+- react-dom
+- next
+
+Installing devDependencies:
+- postcss
+- tailwindcss
+
+													Co-location
+
+In addition to special files, you have the option to colocate your own files (e.g. components, styles, tests, etc) inside folders in the app or any route  directory.
+
+eg:
+
+src/app/about/components/About.jsx
+
+export const About = props => {
+    return <div>
+        <h1>
+            Next.js is a React framework that helps developers build web applications:
+        </h1>
+        <h3>Features:</h3>
+        <p>Next.js provides additional features and optimizations, such as:</p>
+        <ul>
+            <li>
+                Routing: A page-based routing system with support for dynamic routes
+            </li>
+            <li>
+                Pre-rendering: Supports both static generation (SSG) and server-side rendering (SSR) on a per-page basis
+            </li>
+            <li>
+                Code splitting: Automatic code splitting for faster page loads
+            </li>
+        </ul>
+    </div>
+}
+
+src/app/about/page.js
+import { About } from "./components/About";
+
+export default function AboutPage() {
+    return <About/>
+}
+.......................................................................................................
+										Passing Props to Child Components
+.......................................................................................................
+
+src/app/profile/profile.jsx
+export const Profile = ({ id = 0, name = 'name', status = false }) => {
+    return <div>
+        <h1>Id {id}</h1>
+        <h2>Name {name}</h2>
+        <h3>Status {status ? 'Available' : 'Not Available'}</h3>
+    </div>
+}
+
+src/app/profile/page.js
+import { Profile } from "./components/profile";
+
+export default function ProfilePage() {
+    return <div>
+        <Profile id={1} name={'Subramanian Murugan'} status={true} />
+        <Profile  />
+
+    </div>
+}
+
+Task:
+ Create Todo Page , pass list of todos as array
+   Component breakup:
+     -TodoList
+     -TodoListItem
+
+Sample Mock data:
+https://jsonplaceholder.typicode.com/todos
 
 
 
