@@ -641,7 +641,7 @@ export default function RootLayout({ children }) {
   </html>
 }
 .....................................................................................
-			  File Conventions- Types of files
+			  				File Conventions- Types of files
 .....................................................................................
 
 1.layout.js
@@ -703,9 +703,220 @@ Note:
   Page is component
   Layout is compoent.
 
+Since Everything is compoent , which forms component hierachy.
+
+React dev tool can used to look into the component hiearchy....
+
+Using react dev tool we can look , next application....
+
+Component Structure/Hierarchy:
+..............................
+
+<Layout>  - layout.js
+   <Template> -template.js
+	<ErrorBoundary fallback={<Error/>}> global-error.js
+	   <Suspense fallback={<Loading/>}> -loading.js
+		<ErrorBoundary fallback={<NotFound/>} -not-found.js
+		    <Page/> -page.js	
+		<ErrorBoundary>
+           <Suspense>	
+        </ErrorBoundary>
+   </Template>	
+</Layout>
+....................................................................................
+			   						Routing
+		       			 Pages and Layouts
+....................................................................................
+
+In Next js application routing is core concept, every thing is built on the top of routing only.
+
+
+In Next js routing is in built.
+
+The Skeleton of every next app is routing only.
+
+Routing is mapped against folders and files only...
+
+Inside the app directory, "folders" are used to define routes...
+
+src/app
+  /folder -it becomes route
+
+src/app/ ---- index route or home route.
+
+Url pattern(Routing Pattern)
+
+http://localhost:3000/  -----mapped against------src/app/page.js
+
+Route Segment:
+
+  Each folder inside "src/app" represents a "route segment" that maps to a "URL" segement. in order to create route you can nest folders inside each other.
+
+
+URL Pattern:
+
+localhost:3000 /    
+	       |
+            Root segment
+
+Segment means part of url.
+
+
+localhost:3000 /     dashboard /settings
+		|       |            |              
+	Root segment  Segment   leaf Segment
+
+
+....................................................................................
+			  Nested Routing and Segments
+.....................................................................................
+
+
+Create new Project:
+G:\IBM\2024\Nov\Nextjs>npx create-next-app@latest
+√ What is your project named? ... core-routing
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\core-routing.
+
+Using npm.
+
+Initializing project with template: app-tw
+
+
+Installing dependencies:
+- react
+- react-dom
+- next
+
+Installing devDependencies:
+- postcss
+- tailwindcss
+
+...........................................................................................................................................................
+
+							Nested Folders and Routing
+..........................................................................................................................................................
+
+src/app/welcome/page.js
+
+export default function WelcomePage(){
+    return <h1>Welcome Page</h1>
+}
+
+http://localhost:3000/welcome -----> it will show page.js content of welcome/page.js
+
+src/app/about/page.js
+
+export default function About(){
+    return <h2>About</h2>
+}
+http://localhost:3000/about - it will show page.js and content of about/page.js
+
+
+Nested Layout:
+  
+src/app/layout.js - Root Layout.
+ Every Next app must have one single root layout.	
+
+src/app/welcome/layout.js  -Nested layout.
+//nested layout.
+
+export default function WelcomeLayout({ children }) {
+    return <div id="welcome layout">
+        {children}
+    </div>
+}
+
+...................................................................................................
+				      						 Deep Nesting
+........................................................................................................................................................
+
+Dashboard:
+
+app/dashboard/layout.js
+export default function DashboardLayout({ children }) {
+    return <div id="dashboardlayout">
+        {children}
+    </div>
+}
+app/dashboard/page.js
+export default function Dashboard(){
+    return <h1>Dashboard</h1>
+}
+
+http://localhost:3000/dashboard
+
+Dashboard and Settings:
+
+app/dashboard/settings/layout.js
+export default function SettingsLayout({ children }) {
+    return <div id="settingslayout">
+        {children}
+    </div>
+}
+app/dashboard/settings/page.js
+export default function Settings(){
+    return <h1>Settings</h1>
+}
+
+http://localhost:3000/dashboard/settings
+........................................................................................................
+								 Folder is created what if the page.js is not created
+.......................................................................................................
+eg:
+
+src/app/profile
+
+http://localhost:3000/profile
+
+404
+This page could not be found.
+
+if there is no page.js , then next will show the error page automatically which is mapped against not-found.js.
+
+if you dont want default error page and its content, then you can override "not-found.js"
+
+src/app/not-found.js
+export default function NotFound() {
+    return <h1>Oops,Something went Wrong</h1>
+}
+
+...........................................................................................................................................................
+									 Public Access Route
+..........................................................................................................................................................
+if you have different name other than page.js, it will not be available for public access.
+
+app/settings/config.js
+
+http://localhost:3000/settings/config - It will throw error..
 
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
