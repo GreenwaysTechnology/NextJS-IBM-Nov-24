@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
-import Link from "next/link";
+import { NavBar } from './components/Navbar'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,25 +19,11 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <nav>
-          <h1 style={{ textAlign: 'center' }}>IBM</h1>
-          <ul>
-            <li>
-              <Link href="/">Home</Link>
-            </li>
-            <li>
-              <Link href="/about">About</Link>
-            </li>
-            <li>
-              <Link href="/products">Products</Link>
-            </li>
-          </ul>
-        </nav>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <NavBar />
         {children}
       </body>
     </html>
