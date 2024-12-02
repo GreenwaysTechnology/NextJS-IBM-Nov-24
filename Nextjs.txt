@@ -3451,3 +3451,603 @@ export default async function UsersPage() {
 
 }
 ....................................................................................
+
+CURD Operation:
+
+src/app/users/components/users.jsx
+'use client';
+import { useState, useEffect } from 'react';
+
+export  function Users() {
+    const [users, setUsers] = useState([]);
+    const [formData, setFormData] = useState({ id: '', name: '', email: '', role: '' });
+    const [isEditing, setIsEditing] = useState(false);
+
+    useEffect(() => {
+        fetch('/api/users')
+            .then((res) => res.json())
+            .then((data) => setUsers(data));
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (isEditing) {
+            // Update user
+            const res = await fetch(`/api/users/${formData.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: formData.name, email: formData.email, role: formData.role }),
+            });
+
+            if (res.ok) {
+                const updatedUser = await res.json();
+                setUsers((prev) => prev.map((user) => (user.id === updatedUser.id ? updatedUser : user)));
+            }
+            setIsEditing(false);
+        } else {
+            // Create new user
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: formData.name, email: formData.email, role: formData.role }),
+            });
+
+            if (res.ok) {
+                const newUser = await res.json();
+                setUsers((prev) => [...prev, newUser]);
+            }
+        }
+
+        setFormData({ id: '', name: '', email: '', role: '' });
+    };
+
+    const handleEdit = (user) => {
+        setFormData(user);
+        setIsEditing(true);
+    };
+
+    const handleDelete = async (id) => {
+        const res = await fetch(`/api/users/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (res.ok) {
+            setUsers((prev) => prev.filter((user) => user.id !== id));
+        }
+    };
+
+    return (
+        <div>
+            <h1>User Management</h1>
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                    />
+                </div>
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Role"
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    required
+                />
+                <button type="submit">{isEditing ? 'Update User' : 'Add User'}</button>
+            </form>
+            <ul>
+                {users.map((user) => (
+                    <li key={user.id}>
+                        <div className="user-details">
+                            <span>
+                                {user.name} ({user.email}) - {user.role}
+                            </span>
+                        </div>
+                        <div className="actions">
+                            <button onClick={() => handleEdit(user)}>Edit</button>
+                            <button onClick={() => handleDelete(user.id)}>Delete</button>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+
+        </div>
+    );
+}
+
+src/users/page.js
+import { Users } from "./components/users";
+
+export default function UsersPage(){
+
+    return <Users/>
+}
+
+global.css
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  margin: 100px;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+form {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+form input {
+  width: calc(100% - 20px);
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: #005bb5;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  max-width: 600px;
+  margin: 20px auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+li {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+li:last-child {
+  border-bottom: none;
+}
+
+li .user-details {
+  flex-grow: 1; /* Allow the user details to take all available space */
+}
+
+li .actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end; /* Ensure buttons are aligned to the right */
+}
+
+button {
+  padding: 5px 10px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #d32f2f;
+}
+
+button:first-of-type {
+  background-color: #4caf50;
+}
+
+button:first-of-type:hover {
+  background-color: #388e3c;
+}
+.............................................................................................
+....................................................................................
+						 Externalized configuration
+
+.....................................................................................
+
+In the above examples we have hard coded, urls what if i dont want to hard code
+
+const url = `http://localhost:3000/api/users`
+const url = `https://jsonplaceholder.typicode.com/todos`
+
+
+How to externalize the urls,database connection strings,global variables
+
+We have file called ".env" file
+
+Environment variables:
+  Next.js comes with built in support for env variables, which allows you to make your app more configurable, more flexiable.
+
+
+File Syntax:
+
+.env
+.env.enviroment
+
+environment would be 
+
+.env
+.env.development
+.env.production
+.env.test
+.env.local
+
+How to load env variables?
+ ".env" variables are available into process.env
+
+projectRootDir/.env
+DATABASE_URL="file:./dev.db"
+POSTS_URL="https://jsonplaceholder.typicode.com/todos"
+
+
+export async function getUsers() {
+    // const url = `http://localhost:3000/api/users`
+    const url = `${process.env.USERS_URL}/users`
+    const response = await fetch(url)
+    return await response.json()
+}
+
+export async function getTodos() {
+    const todos = await fetch(`${process.env.POSTS_URL}`)
+    return todos.json()
+}
+export default async function TodosPage() {
+    const todos = await getTodos()
+    return <>
+        <div>
+            {todos.map(todo => {
+                return <section key={todo.id}>
+                    <h1>{todo.title}</h1>
+                </section>
+            })}
+        </div>
+    </>
+}
+...........................................................................................
+							Advanced Routing - Dynamic Routes
+			 			 		"Catch All Segement Routing"
+.....................................................................................
+
+/todos/1
+  
+todos
+ |
+ [id]
+   |
+   page.js
+
+
+/shop ----> page.js
+
+/shop/a
+/shop/b
+/shop/c
+/shop/d
+
+shop
+ |
+ [a]
+   |
+   page.js
+ [b]
+   page.js
+ [c]
+   page.js
+
+What if dynamic routes are not predefined in advance...
+    This where catchAll dynamic routing segment comes into picture
+
+The "catchAll" segment is used to capture dynamic route segments that can handle any number of path segments in the URL. This is useful for routing in scenarios where the exact number of path segments is uncertain.
+
+Example: Blog Application
+Let's assume you are building a blog application, and you want to allow access to various types of blog posts, such as categories, authors, and specific post titles.
+
+Folder Structure:
+
+With Catch All:
+
+shop
+  |
+  page.js
+ [...slug]
+   |
+  page.js
+
+/shop/tops
+/shop/tops/tshirt
+/shop/dress/mens/shirt
+
+
+/app
+  /blog
+    /[...slug]
+
+In this structure, [...slug] is a dynamic catchAll route that can capture any path under /blog, whether it's /blog/technology/post-title or /blog/author/author-name.
+
+How to capture parameter?
+ {
+   slug:['tops','tshirt','dress','men','shirt']
+ }
+
+G:\IBM\2024\Nov\Nextjs>npx create-next-app@latest
+√ What is your project named? ... catchall-routing
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\catchall-routing.
+
+Real-Time Use Cases:
+1.Dynamic Blog Categories: If you want different blog categories like technology, health, etc., you can dynamically display posts based on the slug[0] element.
+
+2.Post Filtering: If users access author or category paths, you can render the appropriate content based on the path structure.
+
+3.Flexible Routing: This method is highly flexible, as it supports any number of URL segments.
+
+This approach makes routing in Next.js scalable, especially when dealing with multiple dynamic segments that need to be handled uniformly.
+
+src/app/shop/page.js
+export default function ShopPage() {
+
+    return <h1>
+        Shop Page
+    </h1>
+}
+
+src/app/shop/[...slug]/page.js
+export default function ShopDetailPage({ params }) {
+
+    return <h1>
+        {JSON.stringify(params)}
+    </h1>
+}
+
+ ...................................................................................
+						Advanced Routing - Dynamic Routes
+		   	    "Optional Catch All Segement Routing"
+.....................................................................................
+
+
+With Catch All:
+
+shop
+  |
+  page.js
+ [...slug]
+   |
+  page.js
+
+/shop/tops
+/shop/tops/tshirt
+/shop/dress/mens/shirt
+
+
+In CatchAll segement routing,the root folder has page.js, without that page.js what will happen?
+  You will get 404 - Page Not found
+
+http://localhost:3000/shop
+
+ There would be use case, i dont want page.js inside /shop 
+
+ Thats where we use "Optional CatchAll" segement is used
+
+With Optional CatchAll Segment:
+
+shop
+  |
+ [[...slug]] --optional CatchAll Segement...
+   |
+   page.js
+..............................................................................................
+										.....................................................................................
+							Advanced Routing- Paralle Routing
+.....................................................................................
+
+What is Parallel Route?
+
+ Generally inside a layout, we render only one page by default.
+
+What if i want to render "Multiple Pages" inside single layout simultaneously or conditionally..
+
+"Parallel Routing allow yous to simultaneously or conditionally render one or more pages in the same layout.
+
+For highly section of an app, such as dashboards, and feeds on sites,Parellel routing can be used to implement complex routing patterns.
+
+Component View:
+
+ <Layout>
+    <Page/>
+ </Layout>
+
+Component View: Multiple Pages within a layout.
+
+<Layout>
+   <Page1/>
+   <Page2/>
+</Layout>
+
+Conditional Page Rendering:
+
+<Layout>
+   {condition ? <ThisPage/>:<ThatPage/>
+</Layout>
+
+G:\IBM\2024\Nov\Nextjs>npx create-next-app@latest
+√ What is your project named? ... parallel-routing
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\parallel-routing.
+
+Basic App Structure:
+
+src/app
+   |
+  page.js
+  layout.js
+
+ info
+  |
+  page.js
+  layout.js
+
+Here only info page is inserted into layout
+ I want to display two different pages called "team" and "analytics" with in info layout.
+
+
+src/app/game/layout.js
+export default function GameLayout(props) {
+    return <div id="gameslayout">
+        {props.children}
+    </div>
+}
+
+src/app/game/page.js
+
+export default function GamePage(){
+
+    return <div>
+        <h1>Game Page</h1>
+    </div>
+}
+
+3.Parallel Routing, we have to folder with following syntax
+  @FolderName
+    |
+    layout.js
+    page.js
+
+ @folder is not available as public route like /folderName, this would be part of something else.
+
+Now if you test 
+http://localhost:3000/game/team
+   The out put would be pagenot found, the reason is if you cant access team page publicily, team page is part of something, that means, you must inject into game layout.
+
+How to inject?
+  via props
+
+insert team and analytics page content into game layout.
+
+export default function GameLayout(props) {
+    return <div id="gameslayout">
+        {/* Game Page content */}
+        {props.children}
+        {/* Team Page content */}
+        {props.team}
+        {/* Anaylitcs content */}
+        {props.anaylitics}
+    </div>
+}
+
+....................................................................................
+						 Advanced Routing
+		     Parallel Routing- Conditional Redering
+.....................................................................................
+
+As of now we have seen how to render mutiple pages into a layout.
+
+Now we are going to discuss how to render page or pages into a layout based on condition.
+
+Slot:
+  Portion of UI
+  slots are defined using named slots
+  Slots are defined with @folder Convention
+  For eg @team,@products,@services
+  Slots are passed props to the shared parent layout.
+
+We render a slot based on UI on certain conditions such as checkbox, and options, authetication states.
+
+Syntax:
+@AdminPanel
+@UserPanel
+
+
+src/app/panel/page.js
+export default function Page(){
+    return <div>
+        <h1>Panel Page</h1>
+    </div>
+}
+
+src/app/panel/@AdminPanel/page.js
+
+export default function AdminPanel() {
+    return <div>
+        <h1>Admin</h1>
+    </div>
+}
+
+
+src/app/panel/@UserPanel/page.js
+
+export default function UserPanel() {
+    return <div>
+        <h1>Admin</h1>
+    </div>
+}
+
+src/app/panel/layout.js
+export default function PanelLayout(props) {
+    const isAdmin = false
+    return <div id="panelLayout">
+        {/* Panel Page */}
+        {props.children}
+        {/* Conditional Rendering */}
+        {isAdmin ? props.AdminPanel : props.UserPanel}
+    </div>
+}
