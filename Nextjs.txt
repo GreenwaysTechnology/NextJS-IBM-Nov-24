@@ -724,7 +724,7 @@ Component Structure/Hierarchy:
 </Layout>
 ....................................................................................
 			   						Routing
-		       			 Pages and Layouts
+		       			 	Pages and Layouts
 ....................................................................................
 
 In Next js application routing is core concept, every thing is built on the top of routing only.
@@ -2037,7 +2037,7 @@ Note:
  here props.params.id, "id" is name of the folder eg [id]
 .............................................................................................
 											...................................................................................
-				Master details Page Using API Calls
+				         Master details Page Using API Calls
 ...................................................................................
 
 In Nextjs , api calls are made using "fetch" api by default.
@@ -2462,12 +2462,9 @@ const CartPage = () => {
 };
 
 export default CartPage;
-.............................................................................................
-							  Data Fetching
-............................................................................................
-.....................................................................................
-			....................................................................................
-				Data Fetching
+
+....................................................................................
+							Data Fetching
 ....................................................................................
 Data fetching is nothing but talking to apis particular REST API Or GraphQL api.
 Next app can fetch data either external end points or internal endpoints, next provides feature to build Rest API
@@ -2573,7 +2570,7 @@ Installing devDependencies:
 - tailwindcss
 
 ....................................................................................
-		Data Fetching from external API using "fetch" api
+	    	Data Fetching from external API using "fetch" api
 .....................................................................................
 
 Server component:
@@ -2669,7 +2666,7 @@ what if i want to write client side data fetching with performance?
 We have third party lib which internally wraps fetch only with caching features
 
 ....................................................................................
-		 Data Fetching in Client Components using SWR API
+		       Data Fetching in Client Components using SWR API
 .....................................................................................
 
 what is SWR?
@@ -2867,7 +2864,7 @@ export async function GET(req, { params: { id } }) {
 }
 
 ....................................................................................
-			How to send payload
+			             How to send payload
 ....................................................................................
 
 src/app/api/todos
@@ -2907,16 +2904,6 @@ Note:
  if you write curd operations, no parameters (insert,findAll)
 
  src/app/api/todos/route.js 
-...................................................................................................................................................
-
-
-
-
-
-
-
-
-
 
 ...................................................................................
 	  Building UI, By consuming Third Party api via route Route Handler
@@ -3038,7 +3025,7 @@ export async function DELETE(request, { params: { id } }) {
     }
 }
 ....................................................................................
-			How to integrate with Ui layer
+			           How to integrate with Ui layer
 .....................................................................................
 
 
@@ -3067,4 +3054,400 @@ Task:
 
 Create rest api for products
 Create master detail page for products.
+..............................................................................................
+										....................................................................................
+							Database Integration
+....................................................................................
+Next js can integrate with any data base including sql (mysql,oracle,postgresql) and no sql (mongo,neodb,redis)
+
+In order to talk to databases, application uses database drivers and apis....
+
+Mostly we use using database frameworks called "ORM- Object Relational Mapping" Framework..
+
+For Node js, We have many frameworks...
+
+1.Prisma
+2.Sequelize
+3.Type ORM
+etc...
+
+In order to work database, we need few things
+
+1.database  - mysql or mssql, or mongo database.
+
+How to setup database?
+ 1.download database and you have to install
+      https://www.postgresql.org/download/windows/
+ 2.via docker
+  
+Now a days no body , installing databases directly into machine, rather, we can install via docker.
+
+For training purposes we are going to use "immemory database". You dont need to install database manually either directly or via docker.
+
+In-Memory Databases:
+1.sqlite
+
+2.Database drivers
+ It is set of js programs to connect with databases, and sending sql statements.
+
+
+Steps:
+1.create project
+G:\IBM\2024\Nov\Nextjs>npx create-next-app@latest
+√ What is your project named? ... db-app
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\db-app.
+
+Step 2: Install Prisma framework.
+
+Before installing prisma framework, we have to decide what database we are going to use.
+If you are going to use postgre sql database, then postgresql database must have been installed.
+
+How to install database?  any database
+
+1.download database like postgres
+2.install locally
+
+In modern days, we never download database and install, then how to download and install.
+
+Via container technologies like "Docker".
+
+Now i am going to use "inMemory"  database we dont even need docker....
+
+Note:
+ In memory databases not for production, or not for real time apps, only for learning purpose...
+
+In Memory Databases:
+1.sqllite.
+2.H2
+etc...
+
+we are going to use sqlite database...
+
+Any database we need to install database dirvers for prisma.
+
+
+3.Install sqlite database driver
+G:\IBM\2024\Nov\Nextjs\db-app>npx prisma init --datasource-provider sqlite
+Need to install the following packages:
+prisma@6.0.0
+Ok to proceed? (y) y
+
+
+✔ Your Prisma schema was created at prisma/schema.prisma
+  You can now open it in your favorite editor.
+
+warn You already have a .gitignore file. Don't forget to add `.env` in it to not commit any private information.
+
+Next steps:
+1. Set the DATABASE_URL in the .env file to point to your existing database. If your database has no tables yet, read https://pris.ly/d/getting-started
+2. Run npx prisma db pull to turn your database schema into a Prisma schema.
+3. Run npx prisma generate to generate the Prisma Client. You can then start querying your database.
+4. Tip: Explore how you can extend the ORM with scalable connection pooling, global caching, and real-time database events. Read: https://pris.ly/cli/beyond-orm
+
+More information in our documentation:
+https://pris.ly/d/getting-started
+
+
+After installing , you can find folder inside project
+
+projectRootDir/prisma/schema.prisma
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+ProjectRootDir/".env"
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
+
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
+
+DATABASE_URL="file:./dev.db"
+
+....................................................................................
+			  ORM Fundamentals
+....................................................................................
+What is orm?
+Object Relational Mapping
+ |         |       |
+Entity RDBMS    Binding
+
+In Database programs, we use sql query for creating,inserting, updating, deleting
+
+In ORM World, SQL queries are abstracted by apis like save, findAll, findById, remove,update..
+
+Entity Represents a "table" in the database.
+
+Schema :
+  The plan or structure
+
+Define Model (Enity)
+
+model User {
+
+}
+model Product {
+
+}
+
+Fields:
+ Fields are mapped in the table as columns
+
+model Comment{
+ id Int @id @default(autoincrement())
+ title String
+ content String
+}
+
+id -  column Name(field)
+Int - Datatype
+@id - Primiary Key
+@default - what is value we are going to assign to primary key
+autoincrement - function which generates values...
+
+Where to define this model?
+
+prisma/schema.prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// We have to define model
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+G:\IBM\2024\Nov\Nextjs\db-app>npx prisma migrate dev --name init
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+
+SQLite database dev.db created at file:./dev.db
+
+Applying migration `20241202044948_init`
+
+The following migration(s) have been created and applied from new schema changes:
+
+migrations/
+  └─ 20241202044948_init/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+
+Running generate... (Use --skip-generate to skip the generators)
+
+✔ Generated Prisma Client (v6.0.0) to .\node_modules\@prisma\client in 47ms
+
+.....................................................................................
+AFter running this step, you can see the table structure
+
+
+migrations/
+  └─ 20240311072557_init/
+    └─ migration.sql
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+.....................................................................................
+									Prisma Client api
+.....................................................................................
+Prisma Client api is used to talk database from rest apis.
+
+src/lib/prisma.js
+//Prisma client api 
+import { PrismaClient } from "@prisma/client";
+const globalForPrisma = global
+export const prisma = globalForPrisma.prisma || new PrismaClient({ log: ["query"] })
+.....................................................................................												REST API with Prisma
+................................................................................
+
+src/app/api/users/route.js
+
+
+
+//write rest api which talks to database via prisma client
+
+//import {prisma} from './src/lib/prisma'
+import { prisma } from "@/lib/prisma"; //here default Import alise
+import { NextResponse } from "next/server";
+
+export async function GET() {
+    try {
+        const users = await prisma.user.findMany()
+        if (!users) {
+            return NextResponse.json({ message: 'No Users Found' })
+        } else {
+            return NextResponse.json(users)
+
+        }
+
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+}
+
+CREATE:
+import { prisma } from "@/app/lib/prisma";
+import { NextResponse } from "next/server";
+
+//get all users 
+export async function GET() {
+
+    try {
+        const users = await prisma.user.findMany()
+        if (!users) {
+            return NextResponse.json({ message: 'Users Not found' })
+        }
+        return NextResponse.json(users)
+
+    }
+    catch (err) {
+        return NextResponse.json({ err })
+    }
+
+}
+//create 
+export async function POST(request) {
+    try {
+        const user = await request.json()
+        const response = await prisma.user.create({
+            data: user
+        })
+        //
+        return new NextResponse(JSON.stringify(response), {
+            status: 201, headers: {
+                "Content-Type": "application/json"
+            }
+        })
+    }
+    catch (err) {
+        return NextResponse.json({ err })
+    }
+}
+
+///findById,Update,delete
+//findById
+
+import { prisma } from "@/app/lib/prisma"
+import { NextResponse } from "next/server"
+
+export async function GET(request, { params }) {
+    try {
+        const id = params.id
+        const users = await prisma.user.findUnique({
+            where: {
+                id: id
+            }
+        })
+        if (!users) {
+            return NextResponse.json({ message: 'Users Not Found', code: 404 })
+        }
+        return NextResponse.json(users)
+
+    }
+    catch (err) {
+        return NextResponse.json({ message: err.message, code: 500 })
+    }
+}
+//update
+export async function PUT(request, { params }) {
+    try {
+        const id = params.id
+        const user = await request.json()
+        const updatedUser = await prisma.user.update({
+            where: { id },
+            data: user
+        })
+        if (!updatedUser) {
+            return NextResponse.json({ message: `No user Found with ${id}`, code: 404 })
+        }
+        return NextResponse.json(updatedUser)
+    }
+    catch (err) {
+        return NextResponse.json({ err })
+    }
+}
+
+//delete
+
+export async function DELETE(request, { params }) {
+    try {
+        const id = params.id
+        if (!id) {
+            return NextResponse.json({ message: 'User Not Found', code: 404 })
+        }
+        await prisma.user.delete({
+            where: {
+                id: id
+            }
+        })
+        return new NextResponse(null, { status: 404 })
+    }
+    catch (err) {
+        return NextResponse.json({ err: err })
+    }
+}
+....................................................................................
+			Data base integration with User interface
+....................................................................................
+
+export async function getUsers() {
+    const url = `http://localhost:3000/api/users`
+    const response = await fetch(url)
+    return await response.json()
+}
+
+export default async function UsersPage() {
+    const users = await getUsers()
+    return <main>
+        <ul>
+            {
+                users.map(user => {
+                    return <li>
+                        <span>{user.id} -  {user.name}</span>
+                    </li>
+                })
+            }
+        </ul>
+    </main>
+
+}
 ....................................................................................
