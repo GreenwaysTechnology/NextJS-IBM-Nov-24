@@ -3687,7 +3687,7 @@ button:first-of-type:hover {
 }
 .............................................................................................
 ....................................................................................
-						 Externalized configuration
+					 Externalized configuration
 
 .....................................................................................
 
@@ -3750,8 +3750,8 @@ export default async function TodosPage() {
     </>
 }
 ...........................................................................................
-							Advanced Routing - Dynamic Routes
-			 			 		"Catch All Segement Routing"
+				Advanced Routing - Dynamic Routes
+			 	  "Catch All Segement Routing"
 .....................................................................................
 
 /todos/1
@@ -3853,7 +3853,7 @@ export default function ShopDetailPage({ params }) {
 }
 
  ...................................................................................
-						Advanced Routing - Dynamic Routes
+			     Advanced Routing - Dynamic Routes
 		   	    "Optional Catch All Segement Routing"
 .....................................................................................
 
@@ -3889,8 +3889,7 @@ shop
    |
    page.js
 ..............................................................................................
-										.....................................................................................
-							Advanced Routing- Paralle Routing
+																Advanced Routing- Paralle Routing
 .....................................................................................
 
 What is Parallel Route?
@@ -3995,7 +3994,7 @@ export default function GameLayout(props) {
 }
 
 ....................................................................................
-						 Advanced Routing
+			     Advanced Routing
 		     Parallel Routing- Conditional Redering
 .....................................................................................
 
@@ -4008,7 +4007,7 @@ Slot:
   slots are defined using named slots
   Slots are defined with @folder Convention
   For eg @team,@products,@services
-  Slots are passed props to the shared parent layout.
+  Slots are passed as props to the shared parent layout.
 
 We render a slot based on UI on certain conditions such as checkbox, and options, authetication states.
 
@@ -4050,4 +4049,153 @@ export default function PanelLayout(props) {
         {/* Conditional Rendering */}
         {isAdmin ? props.AdminPanel : props.UserPanel}
     </div>
+}
+.............................................................................................
+			Advanced Routing -Route Groups
+.............................................................................................
+
+....................................................................................
+			Advanced Routing - Route Groups
+....................................................................................
+
+What is Route Group?
+ In the app dir, nested folders are mapped to URL Paths, How ever you mark a folder as a route group to prevent the folder being included in the Route's URL path
+
+
+src/app/dashboard/page.js ------> /dashboard
+
+YOu can mark a folder as a Route group to prevent the folder being included in the route url path
+
+Which is some times are called hidden dirs.
+
+Use case:
+ incase you are organizing your project into multiple folders those folders dont want to include in the url
+G:\IBM\2024\Nov\Nextjs>npx create-next-app@latest
+√ What is your project named? ... route-group
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\route-group.
+
+
+syntax:
+ src
+   |
+   app
+    |
+   (folderName) - which will not be included into url
+	|
+	subfolder
+
+
+eg;
+
+src/app/(auth)/sigin/page.js
+
+export default function SiginPage(){
+    return <>
+    <h1>SiginPage</h1>
+    </>
+}
+
+src/app/(auth)/siginout/page.js
+
+export default function SignOutPage(){
+    return <>
+    <h1>SignOutPage</h1>
+    </>
+}
+
+URL:
+vaild
+http://localhost:3000/signin
+
+invalid
+http://localhost:3000/auth/signin
+
+...................................................................................
+			 Route Groups and Layouts
+           		     (Shared Layout}
+
+
+How to share common layout for all moudles/domains/groups?
+
+src/app/layout.js
+  Root layout for entire app
+
+eg: domains
+
+Marketing,Products,Customers,CustomerCare,Auth
+
+
+This layout is shared for both signin and signout.
+
+src/app/(auth)/layout.js
+
+
+export default function AuthLayout(props) {
+
+    return <div id="AuthLayout">
+        {props.children}
+    </div>
+}
+
+.....................................................................................				 Advanced Routing (Route Groups)
+				(specific Layout)
+
+src/app/(auth)/sigin/layout.js
+
+
+export default function SignInLayout(props) {
+
+    return <div id="Sigin Layout">
+        {props.children}
+    </div>
+}
+...................................................................................
+			Advanced Routing-Route Groups
+			 (Multiple Root Layout)
+....................................................................................
+if you need multiple root layouts, eg i am building ecommerce app, where auth is separte domain, product is separate domain
+
+if you need different layout inside each domain, we have to remove root layout file.
+
+inside each domain layout , we need to return html.
+
+Steps:
+ remove/rename root laout
+
+src/app/layout.js
+
+
+Add domain and add root layout
+
+src/app/(auth)/layout.js
+
+export default function RootLayout({ children }) {
+    return (
+        <html lang="en">
+            <body>
+                <h1>Auth Domain</h1>
+                {children}
+            </body>
+        </html>
+    );
+}
+
+src/app/(customer)/layout.js
+export default function RootLayout({ children }) {
+    return (
+        <html lang="en">
+            <body>
+                <h1>Customer Domain</h1>
+                {children}
+            </body>
+        </html>
+    );
 }
