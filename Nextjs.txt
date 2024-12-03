@@ -4466,7 +4466,6 @@ src/app/page.js
 
  List of Photos
 
-
 src/app/photos/[id]/page.js
   When we click photo , it should be redirected to details
 
@@ -4479,3 +4478,290 @@ by
   	 <Modal>
 		<Frame/>	
          <Modal>
+
+.....................................................................................
+			SSG -Static Site Generation
+.....................................................................................
+
+if pages uses Static Generation, the page html is generated at  "Build time"
+
+When you run "next build" , during that time, pages are generated.
+
+Generated HTML pages will then be reused on each request. It can be cached by CDN.
+
+In Next.js , you can statically generate pages "with data or without data"
+
+G:\IBM\2024\Nov\Nextjs>npx create-next-app@latest
+√ What is your project named? ... ssg-app
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\ssg-app.
+
+Using npm.
+
+Initializing project with template: app-tw
+
+
+Installing dependencies:
+- react
+- react-dom
+- next
+
+Installing devDependencies:
+- postcss
+- tailwindcss
+
+Use case: Static Site Generation without data:
+
+By default, Next.js pre render pages using "SSG" without fetching data.
+
+src/app/about/page.js
+export default function About(){
+    return <h1>
+        About
+    </h1>
+}
+
+Note that this page does not require to fetch any external data to be pre-rendered.
+In this case, next generate a single html file as per page during build time.
+
+G:\IBM\2024\Nov\Nextjs\ssg-app>npm run build
+
+> ssg-app@0.1.0 build
+> next build
+
+   ▲ Next.js 15.0.3
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types
+ ✓ Collecting page data
+ ✓ Generating static pages (5/5)
+ ✓ Collecting build traces
+ ✓ Finalizing page optimization
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    5.46 kB         105 kB
+└ ○ /_not-found                          896 B           101 kB
++ First Load JS shared by all            99.9 kB
+  ├ chunks/4bd1b696-80bcaf75e1b4285e.js  52.5 kB
+  ├ chunks/517-d083b552e04dead1.js       45.5 kB
+  └ other shared chunks (total)          1.88 kB
+
+
+○  (Static)  prerendered as static content
+
+
+G:\IBM\2024\Nov\Nextjs\ssg-app>npm start
+
+> ssg-app@0.1.0 start
+> next start
+
+   ▲ Next.js 15.0.3
+   - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 508ms
+
+
+Use case: Static Generation with Data:
+......................................
+Steps:
+
+1.Create master page
+
+src/app/todos/page.js
+
+SSG APP with data:
+
+=>you have to override the function called "generateStaticParams"
+=>This function is called only during build time.
+
+SSG with dynamic Route:
+
+Steps:
+
+1.create master page
+src/app/todos/page.js
+import Link from "next/link"
+
+export async function fetchTodos() {
+    const url = `https://jsonplaceholder.typicode.com/todos`
+    const response = await fetch(url)
+    return response.json()
+}
+
+
+export default async function TodosMasterPage() {
+    const todos = await fetchTodos()
+    return <div>
+        <h1>Total Todos {todos.length}</h1>
+        <ul>
+            {
+                todos.map(todo=>{
+                    return <li>
+                        <Link href={`/todos/${todo.id}`}>{todo.title}</Link>
+                    </li>
+                })
+            }
+        </ul>
+    </div>
+}
+
+2.create Details Page
+
+
+export async function fetchTodos() {
+    const url = `https://jsonplaceholder.typicode.com/todos`
+    const response = await fetch(url)
+    return response.json()
+}
+export async function fetchTodosByid(id) {
+    const url = `https://jsonplaceholder.typicode.com/todos/${id}`
+    const response = await fetch(url)
+    return response.json()
+}
+
+export default async function TodoDetailPage(props) {
+    const todo = await fetchTodosByid(Number(props.params.id))
+    return <div>
+        <h2>id {todo.id}</h2>
+        <p>title {todo.title}</p>
+        <p>Status {todo.completed ? 'Ok' : 'Not Completed'}</p>
+    </div>
+}
+
+//override funciton which is called during build time in order to prepare the page
+
+export async function generateStaticParams() {
+    const todos = await fetchTodos()
+    //generate html pages for all todos(200 todos), if you have 200 records, 200 html files
+    //to be generated
+
+    return todos.map(todo => {
+        //based on id only the pages are generated, id value must be string always.
+        let id = todo.id.toString()
+        return {
+            //id: id
+            id
+        }
+    });
+}
+npm run build
+
+> ssg-app@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.3
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types
+ ✓ Collecting page data
+ ✓ Generating static pages (207/207)
+ ✓ Collecting build traces
+ ✓ Finalizing page optimization
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    144 B          87.1 kB
+├ ○ /_not-found                          871 B          87.8 kB
+├ ○ /about                               144 B          87.1 kB
+├ ○ /todos                               6.96 kB        93.9 kB
+└ ● /todos/[id]                          144 B          87.1 kB
+    ├ /todos/1
+    ├ /todos/2
+    ├ /todos/3
+    └ [+197 more paths]
++ First Load JS shared by all            87 kB
+  ├ chunks/23-0627c91053ca9399.js        31.5 kB
+  ├ chunks/fd9d1056-2821b0f0cabcd8bd.js  53.6 kB
+  └ other shared chunks (total)          1.86 kB
+
+
+○  (Static)  prerendered as static content
+●  (SSG)     prerendered as static HTML (uses getStaticProps)
+
+
+You can look at project workspace, there is ".next" folder would have been created.
+
+This folder having all production files
+
+.next/server/app/todos
+
+ 1.html
+ 2.html
+ 3.html
+ 200.html
+
+How to test?
+ npm start
+
+.....................................................................................
+			Dynamic segments and SSG
+....................................................................................
+
+Single Dynamic segment
+
+
+export async function generateStaticParams() {
+   return [
+      {id:'1'},{id:'2'},{id:'3'},{id:'4'},{id:'5'}
+   ]
+}
+export default function Page({params}) {
+  const {id} = params
+}
+URL Pattern:
+
+/product/1
+/product/2
+
+Multiple Dynamic segement:
+..........................
+
+export async function generateStaticParams() { 
+   
+ return [{id:'1',cagetory:'a'},{id:'2',cagetory:'b'},{id:'3',cagetory:'c'}]
+}
+
+eg:
+src/app/products/[category]/[product]/page.js
+
+products/1/a - products/id/category
+
+
+export async function generateStaticParams() {
+
+    return [
+        {
+            category:'a',
+            product:'1'
+        },
+        {
+            category:'b',
+            product:'2'
+        },
+        {
+            category:'c',
+            product:'3'
+        },
+        {
+            category:'d',
+            product:'4'
+        }
+
+    ]
+}
+export default function Page({params}){
+    const {category,product} = params
+    return <>
+    <h1>Category {category} Product {product}</h1>
+    </>
+}
+
