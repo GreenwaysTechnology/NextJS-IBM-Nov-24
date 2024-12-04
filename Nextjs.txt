@@ -4199,6 +4199,10 @@ export default function RootLayout({ children }) {
         </html>
     );
 }
+..............................................................................................
+				Route Interceptors
+.............................................................................................
+
 src/app/mock-data/photos.js
 
 const photos = [
@@ -4324,6 +4328,7 @@ export default function Frame({ photo }) {
 Pass image as prop to the FrameComponent.
 
 src/app/photos/[id]page.js
+
 import Frame from "@/app/components/Frame";
 import photos from "@/app/mock-data/photo";
 
@@ -4764,4 +4769,223 @@ export default function Page({params}){
     <h1>Category {category} Product {product}</h1>
     </>
 }
+
+.....................................................................................
+			                  Loading UI and Streaming 
+                             (React Suspense)
+....................................................................................
+
+Loading UI:
+..........
+  There is special file called "loading.js" helps to creating meaninggull loading Ui with "React Suspense"
+
+The special file loading.js helps you create meaningful Loading UI with React Suspense. With this convention, you can show an instant loading state from the server while the content of a route segment loads. 
+The new content is automatically swapped in once rendering is complete.
+
+PS G:\IBM\2024\Nov\Nextjs> npx create-next-app@latest
+√ What is your project named? ... loading-app
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Nov\Nextjs\loading-app.
+
+Using npm.
+
+Initializing project with template: app-tw
+
+
+Installing dependencies:
+- react
+- react-dom
+- next
+
+Installing devDependencies:
+- postcss
+- tailwindcss
+src/app/dashboard/layout.js
+
+export default function DashboardLayout(props){
+    return <>
+        {props.children}
+    </>
+}
+
+src/app/components/greeter.jsx
+export default function Greeter(){
+    return <h1>
+        Greeter
+    </h1>
+}
+src/app/dashboard/page.js
+import React from "react"
+
+//simulate delay using timers with promise
+const Welcome = React.lazy(() => {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, 8000, import('./components/greeter'))
+  })
+})
+
+export default function Home() {
+  return <>
+    <Welcome />
+  </>
+}
+
+Component Structure:
+
+ <Layout>
+     <Suspense fallback={<Loading/>}>
+	  <Page/>
+     </Suspense>
+ </Layout>
+....................................................................................
+	Part of the page only dynamic, how to load static and dynamic content
+
+Can we add loadder via Suspense Manually?
+
+Yes, we can add , always local suspense takes priority.
+
+
+src/app/dashboard/page.js
+
+import React, { Suspense } from "react"
+
+//simulate delay using timers with promise
+const Welcome = React.lazy(() => {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, 8000, import('../components/greeter'))
+    })
+})
+
+const Greeter = React.lazy(() => {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, 10000, import('../components/greeter'))
+    })
+})
+
+export default function DashboardPage() {
+    return <>
+        <h1>Dashboard Header</h1>
+        <Suspense fallback={<h1>Welcome is loading...</h1>}>
+            <Welcome />
+        </Suspense>
+        <Suspense fallback={<h1>Greeter is loading...</h1>}>
+            <Greeter />
+        </Suspense>
+        <h2>Dashboard Footer</h2>
+
+    </>
+
+}
+......................................................................................
+....................................................................................
+			 Streaming
+.....................................................................................
+What is Streaming?
+
+Before understanding what is streaming, we need to understand how SSR works and its limitation.
+
+Streaming is going to improve perofrmance of SRR Limitation.
+
+Steps Involved In SSR:
+.....................
+
+1.First , all data for a given page is fetched on the server.
+
+2.The server then renders the HTML page 
+
+3.Once the HTML is ready, the server will send HTML,CSS,javascript for the page are sent to the client.
+
+4.NonInteractive user interface is shown using the generated HTML and CSS In browser
+
+5.Finally React, Hydrates,the user interface to make it interactive
+
+
+How to measure web site performance?
+
+In order to measure web performance we have some metrics
+
+1.TTFB
+2.FCP
+3.TTI
+
+TTFB: Time to First Byte:
+........................
+ Time to First Byte (TTFB) refers to the time between the browser requesting a page and when it receives the first byte of information from the server. This time includes DNS lookup and establishing the connection using a TCP handshake and SSL handshake if the request is made over HTTPS
+
+TTFB is a metric that measures the time between the request for a resource and when the first byte of a response begins to arrive.
+
+FCP :First Contentfull Paint
+............................
+The First Contentful Paint (FCP) metric measures the time from when the page starts loading to when any part of the page's content is rendered on the screen
+
+
+TTI:Time to Interactive 
+
+  Time to Interactive (TTI) is a non-standardized web performance 'progress' metric defined as the point in time when the last Long Task finished and was followed by 5 seconds of network and main thread inactivity.
+
+These steps are sequentinal and blocking, meaning that the server only render HTML for a page once all the data has been fetched. 
+And on the client side React can only hydrate the UI once the code for all components in the page has been downloaded..
+
+this is traditional process, which degrades the app loading performance
+
+.....................................................................................
+		          How to improve loading performance
+....................................................................................
+
+SSR with React and Next.js helps improve the perceived loading performance by showing a non interactive page to the user as soon as possible.
+
+Only HTML can be sent once the data fetching is over.
+
+
+Streaming allows you to break down the page's HTML into smaller chunks and progressively send those chunks from the server to the client.
+
+This enables part of the page to be displayed sooner, without waiting for all the data to load before any UI can be rendered.
+
+
+How to break down into chunks?
+
+  React mental model is component driven, each component we can treat as chunk.
+
+eg:
+  if a component have priority or that dont rely on data can be sent first (eg layouts),so the react can hydration eariler....
+ if components has less priority, or depends data to be sent later...
+
+How to implement streaming?
+ You have to split code into segments
+
+1.static code which does not depend on data
+2.dynamic code which depends on data.
+
+if you wrap any component with "Suspense Boundary" which is async, can be rendered later.
+
+if the component relays on data fetching, delays with timers, delays with network connections......
+
+Streaming Component:
+....................
+
+export default function Product(props) { 
+   <section>
+    <nav><a href="product.html"><a></nav>
+    <Suspense fallback={<h1>loading....}>
+	 <ProductDetails/>
+     <Suspense>
+   <section>
+	
+}
+
+Through suspense we can enable streaming....
+
+1.Streaming server rendering: Progressively rendering html from the server to the client
+
+2.Selective Hydration 
+    React prioritizes what components to make interactive first based on user interaction.
+...................................................................................................................................................
+
 
