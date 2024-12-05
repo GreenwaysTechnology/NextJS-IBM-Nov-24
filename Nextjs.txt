@@ -4771,7 +4771,7 @@ export default function Page({params}){
 }
 
 .....................................................................................
-			                  Loading UI and Streaming 
+			   Loading UI and Streaming 
                              (React Suspense)
 ....................................................................................
 
@@ -4883,7 +4883,6 @@ export default function DashboardPage() {
     </>
 
 }
-......................................................................................
 ....................................................................................
 			 Streaming
 .....................................................................................
@@ -4987,5 +4986,388 @@ Through suspense we can enable streaming....
 2.Selective Hydration 
     React prioritizes what components to make interactive first based on user interaction.
 ...................................................................................................................................................
+....................................................................................
+			Caching,Revalidation,ISR
+...................................................................................
+What is caching?
+
+ Caching means we dont need to call method more number of times if that method return same value.
+
+Normal function execution
+
+function add(a,b){
+   console.log('add is called')
+   return a + b
+}
+
+add(1,1)
+add(1,1)
+add(1,1)
+add(1,1)
+add(1,1)
+
+here function takes same input, returns same output,but it is called evertime...
+This approach degrades app performance, instead the returned value can be saved in memory or some other place, with same arg , if method called, we dont need to invoke again and again, rather returns result from the memory or some place which is called cache.
+
+Request Memoization:
+
+if "fetch" function is called in single tree  with same url for same data no of times
+that means if you call in the layout, again if call in nested call, again in page , inside page  with in generateMetadata, generateStaticParams... fetch call is cached in the layout itself..
+
+<layout> - fetch('/someapi') - called and cached
+  |
+  <page> - fetch('/someapi') - will take from cache, no api call is made against 			     server
+   |
+   generateMetadata -fetch('/someapi') -will take from cache, no api call is made 					against server
+
+   |
+   generateStaticParams-fetch('/someapi') -will take from cache, no api call is made 					against server
+
+
+   -Render completed - cache is reset.
+
+
+  "React extends the fetch API to automatically memoize requests that have the same URL and options.
+ This means you can call a fetch function for the same data in multiple places in a React component tree while only executing it once."
+
+What if i want to use other than fetch api, like axios?
+
+ you can use axios, but i lacks memoziation , that means that api is not cached by default.
+
+ if want caching with axios, "react cache"
+
+ const cachedFn = cache(fn);
+.....................................................................................
+				ISR
+
+Incremental Static Rendering:
+.............................................................................................................
+ when an app is built during build time, SSG apps.
+
+ISR = SSG + cache + Revaildation + Request time
+
+Points:
+ you can control cache behaviour through coding only for "data cache".
+ if you control data cache, it automatically controls the "Full Route cache"
+ we cant controll "Request Memoziation", it happens automatically, cache will be  reset at every render pass
+ client side (router cache) will be controlled auotmatically by session or timeout.
+
+G:\IBM\2024\Sep\nextjs>npx create-next-app@latest
+√ What is your project named? ... isr-caching
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like your code inside a `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to use Turbopack for next dev? ... No / Yes
+√ Would you like to customize the import alias (@/* by default)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Sep\nextjs\isr-caching.
+
+In order to test how caching works , we are going to use api which returns current date and time , so that we can easily understand how caching is working..
+
+https://worldtimeapi.org/api/timezone/Asia/Kolkata
+
+src/app/timecache/[city]/page.js
+In order to test how caching works , we are going to use api which returns current date and time , so that we can easily understand how caching is working..
+
+https://worldtimeapi.org/api/timezone/Asia/Kolkata
+
+
+
+export default async function CachePage(props) {
+    //with caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata')
+    const data = await response.json()
+
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+}
+Testing:
+http://localhost:3000/timecache/Kolkata
+
+You can notice the time has not changed, because data has been cached by default.
+.....................................................................................
+
+Without Cache: When cache is disabled:
+......................................
+//without cache
+export default async function CachePage(props) {
+    //without caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata', { cache: 'no-store' })
+    const data = await response.json()
+
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+}
+
+Testing:
+http://localhost:3000/timecache/Kolkata
+
+now you can notice , the data is keep on changing.
+
+.....................................................................................
+			Caching and Revalidation (clear the cache)
+
+How to revalidate the cache?
+
+1.Time based revalidation
+
+2.OnDemand revalidation
+   ->Tag based
+   ->Path based
+
+You can mix all revalidation in single route segment...
+
+Time based Revalidation:
+
+ Configuration can be provided
+
+1.As part of fetch api call
+2.As part of route segment config object
+
+
+1.As part of fetch api call
+
+export default async function CachePage(props) {
+    //with caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata',
+         { next: { revalidate: 10 } })
+    const data = await response.json()
+
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+}
+
+2.As part of route segment config object.
+
+
+export const revalidate = 5
+
+export default async function CachePage(props) {
+    //with caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata')
+    const data = await response.json()
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+}
+
+3.Both places
+
+
+2.As part of route segment config object.
+
+
+export const revalidate = 5
+
+export default async function CachePage(props) {
+    //with caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata',{ next: { revalidate: 2 } })
+    const data = await response.json()
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+}
+.....................................................................................
+
+....................................................................................
+				OnDemand Revalidation
+.....................................................................................
+
+OnDemand revalidation is done via api call, when you call api, validation triggers
+
+Steps:
+1.You have to write rest api, which revalidates cache.
+ 1..1. You can use path 
+ 1..2. YOu can use tag
+ 1..3  YOu can use both
+
+
+Path Based:
+ Based on url we can clear cache
+
+/api/products - clear the cache related to products
+
+src/app/api/revalidate/route.js
+
+//
+
+import { revalidate } from "next/cache"
+import { NextResponse } from "next/server"
+
+export async function GET(reqest) {
+    //get the path
+    const path = request.nextUrl.searchParams.get('path') || '/timecache/Kolkata'
+    revalidate(path)
+    console.log('revalided', path)
+    return NextResponse.json({ revalidate: true, now: new Date.now(), cache: 'no-store' })
+}
+
+src/app/timecache/[city]/page.js
+//onDemand Revalidation
+
+export default async function CachePage(props) {
+    //with caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata')
+    const data = await response.json()
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+}
+
+Testing:
+ 
+GET http://localhost:3000/api/revalidate
+
+after running this 
+
+You can check whether cache is cleared or not.
+
+http://localhost:3000/timecache/Kolkata
+.....................................................................................
+
+..................................................................................
+Tag Based Revalidation:
+
+Steps:
+1.we have to add tag in fetch call.
+export default async function CachePage(props) {
+    //with caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata',
+        {
+            next: {
+                tags: ['timerTag']
+            }
+        })
+    const data = await response.json()
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+
+
+
+2.We have to get tag in api, based on that we have to revalidate.
+
+//tag based
+export async function GET(request) {
+    //get the path
+    const tag = request.nextUrl.searchParams.get('timerTag') || 'timerTag'
+    revalidateTag(tag)
+    console.log('revalided', tag)
+    return NextResponse.json({ revalidate: true, now: Date.now(), cache: 'no-store' })
+}
+ 
+GET http://localhost:3000/api/revalidate
+
+after running this 
+
+You can check whether cache is cleared or not.
+
+http://localhost:3000/timecache/Kolkata
+....................................................................................
+...................................................................................
+			..................................................................................
+			 ISR- Incremental Static Rendering
+...................................................................................
+
+ISR  =SSG +Caching + Revalidation.
+
+SSG:
+  -Building pages during build time.
+  -Incase if page uses data that means fetching data from apis,that data only used    during build phase
+  -page is built and cache it 
+  
+Revalidation:
+  -When we want fresh data for the page
+  -during revalidation, cache is cleared so that the page also need to be    rerendered..
+
+"Incrementatal static rendering is nothing but create pages during build time and cache it, if any data change for the particular page, re render that page, after clearing the cache either by using time based or on demand or both"
+
+ISR = SSR + Staic Renderning + Dynamic Rendering + SSG +request time
+
+How to implement ISR?
+
+1.Enable Cache
+2.Select Revalidation pattern
+3.override generateStaticParams method where you have to generate page, after build time, the page is cached.
+4.revalidate the pre build page, using revalidation pattern so that the page is rebuilt.
+
+During SSG, the pages are cached by default.
+
+Once the app is gone to the production, after that if you want to rebuild page you can apply revalidation process.
+
+ISR = SSG + Revalidation.
+
+
+export default async function CachePage(props) {
+    //with caching
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata',
+        {
+            next: {
+                tags: ['timerTag']
+            }
+        })
+    const data = await response.json()
+    return <div>
+        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+    </div>
+}
+
+SSG:
+export async function generateStaticParams() {
+    return [{
+        city: 'Kolkata'
+    }]
+}
+Testing:
+ You can select any revalidation pattern either timer or on demand.
+
+
+G:\IBM\2024\Sep\nextjs\caching-isr>npm run build
+
+> caching-isr@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.10
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types
+ ✓ Collecting page data
+ ✓ Generating static pages (7/7)
+ ✓ Collecting build traces
+ ✓ Finalizing page optimization
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    5.25 kB        92.3 kB
+├ ○ /_not-found                          871 B          87.9 kB
+├ ƒ /api/revalidate                      0 B                0 B
+└ ● /timecache/[city]                    137 B          87.2 kB
+    └ /timecache/Kolkata
++ First Load JS shared by all            87.1 kB
+  ├ chunks/23-8d0b25cd7d597713.js        31.6 kB
+  ├ chunks/fd9d1056-2821b0f0cabcd8bd.js  53.6 kB
+  └ other shared chunks (total)          1.86 kB
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+G:\IBM\2024\Sep\nextjs\caching-isr>npm start
+
+> caching-isr@0.1.0 start
+> next start
+
+  ▲ Next.js 14.2.10
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 418ms
 
 
