@@ -5065,114 +5065,60 @@ G:\IBM\2024\Sep\nextjs>npx create-next-app@latest
 Creating a new Next.js app in G:\IBM\2024\Sep\nextjs\isr-caching.
 
 In order to test how caching works , we are going to use api which returns current date and time , so that we can easily understand how caching is working..
+In Next.js 15 , fetch witout any configuration, caching is disabled, caching is not enabled without any parameter.
 
-https://worldtimeapi.org/api/timezone/Asia/Kolkata
-
-src/app/timecache/[city]/page.js
-In order to test how caching works , we are going to use api which returns current date and time , so that we can easily understand how caching is working..
-
-https://worldtimeapi.org/api/timezone/Asia/Kolkata
+fetch('api/something') - here caching is disabled, meaning that you get fresh data always
+fetch('/api/something',{ cache: 'force-cache' }) - here caching is enabled.
 
 
-
-export default async function CachePage(props) {
+xport default async function CachePage(props) {
     //with caching
-    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata')
+
+    // const response = await fetch('https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Kolkata',{cache:'force-cache'})
+    // const response = await fetch('http://localhost:8080/api/timezone/Asia/Kolkata', { cache: 'force-cache' })
+
+    // const response = await fetch('http://localhost:8080/api/timezone/Asia/Kolkata')
+
+    // const response = await fetch('http://localhost:8080/api/timezone/Asia/Kolkata', { cache: 'force-cache' })
+    // const response = await fetch('https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Kolkata', { cache: 'force-cache' })
+    const response = await fetch('https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Kolkata')
     const data = await response.json()
 
     return <div>
-        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+        <h1>Time Now: {new Date(data.dateTime).toLocaleTimeString()}</h1>
     </div>
 }
-Testing:
-http://localhost:3000/timecache/Kolkata
 
-You can notice the time has not changed, because data has been cached by default.
-.....................................................................................
 
-Without Cache: When cache is disabled:
-......................................
-//without cache
+Revalidation:
 export default async function CachePage(props) {
-    //without caching
-    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata', { cache: 'no-store' })
+    //with caching and revalidation
+
+    const response = await fetch('https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Kolkata',
+        { cache: 'force-cache', next: { revalidate: 10 } })
     const data = await response.json()
 
     return <div>
-        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+        <h1>Time Now: {new Date(data.dateTime).toLocaleTimeString()}</h1>
     </div>
 }
 
-Testing:
-http://localhost:3000/timecache/Kolkata
-
-now you can notice , the data is keep on changing.
-
-.....................................................................................
-			Caching and Revalidation (clear the cache)
-
-How to revalidate the cache?
-
-1.Time based revalidation
-
-2.OnDemand revalidation
-   ->Tag based
-   ->Path based
-
-You can mix all revalidation in single route segment...
-
-Time based Revalidation:
-
- Configuration can be provided
-
-1.As part of fetch api call
-2.As part of route segment config object
-
-
-1.As part of fetch api call
-
-export default async function CachePage(props) {
-    //with caching
-    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata',
-         { next: { revalidate: 10 } })
-    const data = await response.json()
-
-    return <div>
-        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
-    </div>
-}
-
-2.As part of route segment config object.
-
-
+Revaldation using Route segment options and configuration:
+//route segment config option
 export const revalidate = 5
 
 export default async function CachePage(props) {
-    //with caching
-    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata')
+    //with caching and revalidation
+
+    const response = await fetch('https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Kolkata',
+        { cache: 'force-cache', next: { revalidate: 10 } })
     const data = await response.json()
+
     return <div>
-        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
+        <h1>Time Now: {new Date(data.dateTime).toLocaleTimeString()}</h1>
     </div>
 }
-
-3.Both places
-
-
-2.As part of route segment config object.
-
-
-export const revalidate = 5
-
-export default async function CachePage(props) {
-    //with caching
-    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata',{ next: { revalidate: 2 } })
-    const data = await response.json()
-    return <div>
-        <h1>Time Now: {new Date(data.datetime).toLocaleTimeString()}</h1>
-    </div>
-}
-.....................................................................................
+....................................................................................
 
 ....................................................................................
 				OnDemand Revalidation
@@ -5269,7 +5215,6 @@ You can check whether cache is cleared or not.
 
 http://localhost:3000/timecache/Kolkata
 ....................................................................................
-...................................................................................
 			..................................................................................
 			 ISR- Incremental Static Rendering
 ...................................................................................
@@ -5369,5 +5314,5 @@ G:\IBM\2024\Sep\nextjs\caching-isr>npm start
 
  ✓ Starting...
  ✓ Ready in 418ms
-
+......................................
 
