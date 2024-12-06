@@ -5506,10 +5506,1026 @@ export default function SuccessPage() {
     </div>
 }
 
+........................................................................................
+				GraphQL Integration
+.........................................................................................
+.....................................................................................
+			How to consume graphql api inside next js
+...................................................................................
+
+Basics of Graphql:
+
+What is Graphql?
+Graphql Sepcification
+Graphql implemention
+  -server implementation -Apollo Server
+  -client implementation -next js as client
+
+What is GraphQL?
+	GraphQL is a "new API" standard that provides a more efficient, powerful and flexible alternative to REST.
+
+REST:
+   REST has not been designed to be user centric rather than data centric...
+
+GET  /api/products
+
+ =>[{
+  ...
+ }]
+
+At its core, GraphQL enables declarative data fetching where a client can specify exactly what data it needs from an API.
+
+Instead of multiple endpoints that return fixed data structures, a GraphQL server only exposes a single endpoint and responds with precisely the data a client asked for.
+
+Most applications today have the need to fetch data from a server where that data is stored in a database. It’s the responsibility of the API to provide an interface to the stored data that fits an application’s needs.
+
+GraphQL is often confused with being a database technology. This is a misconception, GraphQL is a query language for APIs - not databases. In that sense it’s database agnostic and effectively can be used in any context where an API is used.
+
+A more efficient Alternative to REST
+....................................
+
+REST has been a popular way to expose data from a server. When the concept of REST was developed, client applications were relatively simple and the development pace wasn’t nearly where it is today. REST thus was a good fit for many applications. However, the API landscape has radically changed over the last couple of years. In particular, there are three factors that have been challenging the way APIs are designed:
+
+1. Increased mobile usage creates need for efficient data loading
+Increased mobile usage, low-powered devices and sloppy networks were the initial reasons why Facebook developed GraphQL. GraphQL minimizes the amount of data that needs to be transferred over the network and thus majorly improves applications operating under these conditions.
+
+2. Variety of different frontend frameworks and platforms
+The heterogeneous landscape of frontend frameworks and platforms that run client applications makes it difficult to build and maintain one API that would fit the requirements of all. With GraphQL, each client can access precisely the data it needs.
+
+3. Fast development & expectation for rapid feature development
+Continuous deployment has become a standard for many companies, rapid iterations and frequent product updates are indispensable. With REST APIs, the way data is exposed by the server often needs to be modified to account for specific requirements and design changes on the client-side. This hinders fast development practices and product iterations.
+....................................................................................
+			  GraphQL request and response model.
+.....................................................................................
+
+Declarative Programming:
+
+What you write, you have to get the same structure.
+
+The Query request is more readable,declarative. WHich micics the javascript object literal syntax.
+
+js object:
+
+ let user =  {
+     id:1,
+     name:'joe'
+     friends: [
+        'bar','foo'
+     ]
+  }
 
 
+GraphQL Request payload : GraphQL Query
+
+GraphQL Client 
+
+POST /endpoint
+
+  {
+     id
+     name
+     friends { -----------------------------> GraphQLServer
+        name
+     }
+  } 
+
+Response:JSON
+ {
+     "id":1,
+     "name":"joe"
+     "friends": [      <----------------------------- GraphQLServer
+        "bar","foo"
+     ]
+  } 
+....................................................................................
+	.....................................................................................
+				GRAPHQL And CURD
 
 
+GraphQL uses only URL which exposes Service
 
 
+  {
+     id
+     name
+     friends { -----------HTTP POST------------------> GraphQLServer
+        name
+     }
+  } 
 
+Operation Types:
+
+1.Query === GET request in HTTP server
+            read
+2.mutation === HTTP POST,PUT,DELETE
+  create,update,delete
+3.subscription
+   Streaming
+
+query - a read only fetch
+mutation- a write followed by read
+subscription- a long live request that fetches data in response to source events.
+............................................................................................
+.....................................................................................
+			 Graphl specification
+....................................................................................
+
+There are two types of specification
+
+1.client side
+   Graphql Query language specification
+2.server side
+  Graphql Schema Language specification
+
+if you know both, it would be nice..
+
+.....................................................................................
+			 Graphql Query language - Spec
+.....................................................................................
+
+Client Side development:
+
+ In this module, we are going to learn how to send request(graphql) request to graphql server..
+
+
+1.Selection set
+
+selectionSet: {
+ Selection
+}
+
+Selection:
+ fields
+ Fragment Spread
+ inline fragament
+
+SelectionSet : What type of operations (query,mutation,subscription)
+
+
+Read:
+
+query  {
+    fields
+    Fragment Spread
+    inline fragament
+}
+fields: could be what are the data you are expecting from the server
+eg:User information 
+
+in the server user information could be many fields
+ firstName,lastName,id,age,city,state,status,pic,stars,ranking....
+
+field List :
+ You are asking the server that , hey i want only these fields
+
+query  {
+   id
+   firstName  ====>POST request=========/url===>GraphQLServer==>Execute api
+   lastName   <====response would be json
+}
+Create,Update,Remove: Mutation
+
+mutation createUser(params) { 
+  user
+}
+mutation updateUser(params) { 
+  user
+}
+mutation removeUser(params) { 
+  user
+}
+
+
+Streaming: (read with Streaming)
+
+subscription  getStockQuote (params){
+  name
+  price
+  qty
+}
+
+.................................................................................................................................................
+		   How to learn graphql query language
+..........................................................................................
+
+in order to work with query language we need graphql server, if you dont have local graphql server we can use mock apis
+
+Fake api servers
+https://graphqlzero.almansi.me/#example-top
+https://countries.trevorblades.com/
+ 
+Tools to test graphql end points
+
+1.Client tools
+  postman
+ etc...
+https://studio.apollographql.com/sandbox/explorer/?_gl=1%2Appq3ps%2A_gcl_au%2AMTc1OTg3NTQ3Mi4xNzI2MTIzOTI3
+
+....................................................................................
+		   How to learn graphql query language
+
+in order to work with query language we need graphql server, if you dont have local graphql server we can use mock apis
+
+Fake api servers
+https://graphqlzero.almansi.me/#example-top
+https://countries.trevorblades.com/
+ 
+
+Tools to test graphql end points
+
+1.Client tools
+  postman
+
+Core concepts:
+=>fields
+=>arguments
+=>aliases
+=>fragments
+=>variables
+=>directives
+=>Mutations
+=>inline fragments
+
+Fiedls:
+  At its simplest, GraphQL is about asking for specific fields on objects.
+
+Lets start by looking at a very simple query and the result we get when we run it.
+Simple Query:
+
+query  {
+   countries {
+    name
+    capital
+    code
+    phone
+    
+  }
+}
+Sample Response:
+{
+  "data": {
+    "countries": [
+      {
+        "name": "Andorra",
+        "capital": "Andorra la Vella",
+        "code": "AD",
+        "phone": "376"
+      },
+      {
+        "name": "United Arab Emirates",
+        "capital": "Abu Dhabi",
+        "code": "AE",
+        "phone": "971"
+      }
+   }
+  ]
+}
+
+query is name of the operation - read 
+"countries" is api name from the server   - function countries(){} - returns object-enity
+
+"code,name" are fields (variables)
+
+Short cut:
+ we dont need to specificy query keyword
+{
+  countries {
+    code
+    name
+  }
+}
+More fields:
+ How do we know that the api has more fields?
+In the playground, we can see docs in the playground
+
+ {
+    countries {
+        name
+        code
+        native
+        capital
+        currency
+    }
+}
+
+Inside Graphql server, the above fields are encapulated inside object.
+Object property may nest other objects.
+
+Inside Graphql server, the above fields are encapulated inside object.
+Object property may nest other objects.
+
+How to query nested values?
+
+ {
+    countries {
+        name
+        code
+        native
+        capital
+        currency
+        continent {
+            name
+        }
+    }
+}
+
+We can use method name syntax
+ query getAllCountries {
+    countries {
+        name
+        code
+        native
+        capital
+        currency
+        continent {
+            name
+        }
+    }
+}
+....................................................................................
+.....................................................................................
+			   Arguments
+.....................................................................................
+
+What if i want to get data based  on some condition or conditions?
+
+Synax:
+
+ query getCountryByCode {
+     country(code:"US"){
+          name
+          capital
+          currency
+          phone
+     }
+ }
+Here 
+ code is variable , "US" is value
+ getCountryByCode is "Query Header" which name canbe any thing
+ country is api name
+ 
+.....................................................................................
+			   Arguments
+.....................................................................................
+
+What if i want to get data based  on some condition or conditions?
+
+Synax:
+
+ query getCountryByCode {
+     country(code:"US"){
+          name
+          capital
+          currency
+          phone
+     }
+ }
+Here 
+ code is variable , "US" is value
+ getCountryByCode is "Query Header" which name canbe any thing
+ country is api name
+ 
+Arg can be static or dynamic arg
+
+Static means passing hardcoded value..
+
+ query getCountryByCode {
+     country(code:"US"){
+          name
+          capital
+          currency
+          phone
+     }
+     continent(code:"AS") {
+         name
+     }
+}
+...................................................................................
+			 Dynamic parameters and arguments -Variables
+...................................................................................
+
+Variables:
+ Variables are place holders to have dynamic values.
+ In case of clients app,you may select values from the drop down or from text field
+
+Variables are introduced in graphql via "$VariableName"
+
+Steps: 
+1.replace static values in the query with $variable
+2.Declare the variable ($VariableName) as part of the query header
+
+Variables:
+ Variables are place holders to have dynamic values.
+ In case of clients app,you may select values from the drop down or from text field
+
+Variables are introduced in graphql via "$VariableName"
+
+Steps: 
+1.replace static values in the query with $variable
+2.Declare the variable ($VariableName) as part of the query header
+
+Static
+ query getCountryByCode {
+     country(code:"US"){
+          name
+          capital
+          currency
+          phone
+     }
+     
+}
+Dynamic
+ query getCountryByCode($variableName:DataType) {
+     country(code:$variableName){
+          name
+          capital
+          currency
+          phone
+     }
+     
+}
+
+ query getCountryByCode($code:ID!) {
+     country(code:$code){
+          name
+          capital
+          currency
+          phone
+     }
+     
+}
+How to pass values to this Query?
+ Via Query variables in playground.
+
+{
+    "code":"IN"
+}
+Response:
+{
+    "data": {
+        "country": {
+            "name": "India",
+            "capital": "New Delhi",
+            "currency": "INR",
+            "phone": "91"
+        }
+    }
+}
+...................................................................................
+			Default Arg
+....................................................................................
+
+What if i dont send the query variable as input, we can substitue default value
+
+ query getCountryByCode($code:ID!="IN") {
+     country(code:$code){
+          name
+          capital
+          currency
+          phone
+     }
+     
+}
+
+if you pass  country code, you will get response
+{
+    "code":"US"
+}
+Response:
+
+{
+    "data": {
+        "country": {
+            "name": "United States",
+            "capital": "Washington D.C.",
+            "currency": "USD,USN,USS",
+            "phone": "1"
+        }
+    }
+}
+if you dont pass country code
+{
+    "data": {
+        "country": {
+            "name": "India",
+            "capital": "New Delhi",
+            "currency": "INR",
+            "phone": "91"
+        }
+    }
+}
+....................................................................................
+			Short cut :without method Name 
+ query ($code:ID!="IN") {
+     country(code:$code){
+          name
+          capital
+          currency
+          phone
+     }
+     
+}
+Recommendation : having method name for more readablity.
+
+ query getCountryByCode($code:ID!="IN") {
+     country(code:$code){
+          name
+          capital
+          currency
+          phone
+     }
+     
+}
+.....................................................................................
+What can be parameter or arg types?
+
+1.Can be primitives(Scalar types) - ID,String,Int,Float,Enums
+2.Can be complex types - Object Types
+3.Input type
+ Input is special complex type, used to represent input parameters.
+ Input types are very usefull incase of mutation
+
+I want to get Language information.
+
+query getlanguageInfo($filter:LanguageFilterInput) {
+    languages(filter:$filter) {
+        code 
+        name
+        native
+        rtl
+    }
+}
+
+After execution , you will get all language info
+
+{
+    "data": {
+        "languages": [
+            {
+                "code": "af",
+                "name": "Afrikaans",
+                "native": "Afrikaans",
+                "rtl": false
+            },
+            {
+                "code": "am",
+                "name": "Amharic",
+                "native": "አማርኛ",
+                "rtl": false
+            },
+            {
+                "code": "ar",
+                "name": "Arabic",
+                "native": "العربية",
+                "rtl": true
+            },
+            {
+                "code": "ay",
+                "name": "Aymara",
+                "native": "Aymar",
+                "rtl": false
+            },
+            
+]
+ 
+After giving query variable:
+
+{
+    "filter": {
+        "code" : {
+            "eq" : "en"
+        }
+    }
+}
+
+Response :
+{
+    "data": {
+        "languages": [
+            {
+                "code": "en",
+                "name": "English",
+                "native": "English",
+                "rtl": false
+            }
+        ]
+    }
+}
+...................................................................................
+			Multiple arg variables
+...................................................................................
+
+Multiple Variables:
+....................
+
+query getProfile($id:Int,$withFriends:Boolean=false) {
+
+     user(id:$id,withFriends:$withFriends) {
+	  name
+          pic
+      }
+}
+Passing values:
+{"id":1 , "withFriends" : true}
+{"id":2 }
+
+.....................................................................................	
+                       Alises
+....................................................................................
+
+Filed Alises gives dummy name for keys..
+
+Syntax:
+ without Aliases:
+
+query { 
+  user(id:1){
+    id 
+    name
+  }
+}
+Response:
+{
+  "data": { 
+    "user": {
+	"id":1
+         "name":"Subramanian"
+    }
+  }
+}
+
+With Alises:
+
+query { 
+  subramanian:user(id:1){
+    id 
+    name
+  }
+}
+Response:
+{
+  "data": { 
+    "subramanian": {
+	"id":1
+         "name":"Subramanian"
+    }
+  }
+}
+eg:
+query getlanguageInfo($filter:LanguageFilterInput) {
+    englishLanguage:languages(filter:$filter) {
+        code 
+        name
+        native
+        rtl
+    }
+}
+{
+    "data": {
+        "englishLanguage": [
+            {
+                "code": "en",
+                "name": "English",
+                "native": "English",
+                "rtl": false
+            }
+        ]
+    }
+}
+.....................................................................................
+			Fragements : Resuable Selection Set
+.....................................................................................
+
+Without fragement:
+...................
+
+query {
+   user(id:2){
+      friends {
+	id 
+        name
+        pic
+      }
+      mutualfriends {
+	id 
+        name
+        pic
+      }
+   }
+}
+Here friends and mutual friends are having same set of data
+
+With Fragements:
+...............
+query {
+   user(id:2){
+      friends {
+	...friendsFields
+      }
+      mutualfriends {
+	...friendsFields
+      }
+   }
+}
+
+fragement friendsFields on User{
+        id 
+        name
+        pic
+}
+
+eg:
+query GetA1AndA2Countries {
+    a1Countries:countries {
+        ...countryInfo
+    }
+    a2Countries:countries {
+        ...countryInfo
+    }
+}
+fragment countryInfo on Country {
+    name
+    capital
+}
+Response:
+"data": {
+        "a1Countries": [
+            {
+                "name": "Andorra",
+                "capital": "Andorra la Vella",
+                "__typename": "Country"
+            },
+            {
+                "name": "United Arab Emirates",
+                "capital": "Abu Dhabi",
+                "__typename": "Country"
+            },
+            {
+                "name": "Afghanistan",
+                "capital": "Kabul",
+                "__typename": "Country"
+            }
+	 ],
+	 "a2Countries": [
+            {
+                "name": "Andorra",
+                "capital": "Andorra la Vella",
+                "__typename": "Country"
+            },
+            {
+                "name": "United Arab Emirates",
+                "capital": "Abu Dhabi",
+                "__typename": "Country"
+            },
+            {
+                "name": "Afghanistan",
+                "capital": "Kabul",
+                "__typename": "Country"
+            }
+	 ]
+}
+.....................................................................................				   Directives
+....................................................................................
+Directives are built in functions which provides some utilites.
+Directives starts with @DirectiveName(arg:Type)
+
+Built in directives
+
+@include(if:Boolean)
+  conditionally include this field in the result if the arg is true
+@skip(if:Boolean)
+   conditionally exclude this field in the result if the arg is true
+
+query getProfile($id:Int,$withFriends:Boolean=false){ 
+	
+     user(id:$id) {
+	name
+	pic
+	friends @include(if:$withFriends){
+		name
+	}
+     }  
+      
+
+}
+
+Query Variable:
+ {"id":5, "withFriends":true}
+
+eg:
+query getLanguage($code:ID!,$rtl:Boolean!) {
+    language(code:$code){
+        name 
+        native @include(if:$rtl)
+    }
+}
+
+Query Variable:
+{
+    "code":"en",
+    "rtl":true
+}
+
+Response:
+{
+    "data": {
+        "language": {
+            "name": "English",
+            "native": "English"
+        }
+    }
+}			
+
+False condition:
+Query Variable:
+{
+    "code":"en",
+    "rtl":false
+}		
+Response:
+{
+    "data": {
+        "language": {
+            "name": "English"
+        }
+    }
+}
+....................................................................................
+				Mutations
+...................................................................................
+
+How to send payload to create,update,delete
+IN REST
+
+POST=>CREATE
+PUT=>UPDATE
+DELETE=>REMOVE
+GET=>READ
+
+Mutations 
+........
+
+mutation is keyword used to create,update,remove...
+API url :
+https://graphqlzero.almansi.me/api
+
+CREATE:
+.......
+eg:
+mutation CreatePost(
+  $input: CreatePostInput!
+) {
+  createPost(input: $input) {
+    id
+    title
+    body
+  }
+}
+
+Query Variables:
+{
+  "input": {
+    "title": "A Very Captivating Post Title",
+    "body": "Some interesting content."
+  }
+}
+
+Response:
+
+{
+    "data": {
+        "createPost": {
+            "id": "101",
+            "title": "A Very Captivating Post Title",
+            "body": "Some interesting content."
+        }
+    }
+}
+........................
+
+Update :
+mutation UpdatePost($id: ID!,$input: UpdatePostInput!) {
+  updatePost(id: $id, input: $input) {
+    id
+    body
+  }
+}
+Query Variable
+
+{
+  "id": 1,
+  "input": {
+    "body": "Some updated content."
+  }
+}
+
+Response
+{
+  "updatePost": {
+    "id": "1",
+    "body": "Some updated content."
+  }
+}
+....................................................................................
+Delete :
+
+mutation RemovePost($id: ID!) {
+  deletePost(id: $id)
+}
+Query Variable:
+
+{
+  "id": 101
+}
+Response:
+{
+  "deletePost": true
+}
+..............................................................................................
+			How to integrate with next js
+.............................................................................................
+
+ What is your project named? ... graphql-nextclient
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like to use `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to customize the default import alias (@/*)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\Sep\nextjs\graphql-nextclient.
+Apollo has released "Apollo client Lib with Next.js 13 onwards".
+
+Lib:
+ This lib now is under experimental, in future it will be stablished..
+
+@apollo/experimental-nextjs-app-support
+
+npm install @apollo/client@latest  @apollo/experimental-nextjs-app-support
+
+Lib:
+ This lib now is under experimental, in future it will be stablished..
+
+@apollo/experimental-nextjs-app-support.
+
+Next 13 Compoent types
+
+1.Server Component
+2.Client Component
+
+Apollo provides wrapper for both components...
+
+
+Eg:
+npm install @apollo/client@latest @apollo/experimental-nextjs-app-support
+
+
+src/app/lib/client.js
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+
+import {
+    registerApolloClient,
+} from "@apollo/experimental-nextjs-app-support";
+
+export const { getClient } = registerApolloClient(() => {
+    return new ApolloClient({
+        cache: new InMemoryCache(),
+        link: new HttpLink({
+            // https://studio.apollographql.com/public/spacex-l4uc6p/
+            uri: "https://countries.trevorblades.com/",
+            // you can disable result caching here if you want to
+            // (this does not work if you are rendering your page with `export const dynamic = "force-static"`)
+            // fetchOptions: { cache: "no-store" },
+        }),
+    });
+});
+
+
+src/app/countries/page.js
+
+import { gql } from "@apollo/client"
+import { getClient } from "../lib/client"
+
+//Declare Query
+const query = gql`query {
+   countries {
+        name
+    }
+  }
+`
+
+export default async function CountriesPage() {
+    const { data: { countries } } = await getClient().query({ query })
+
+    return <div>
+        <h1>Countries Info From Graphql Server</h1>
+        <ul>
+            {countries.map(country => {
+                return <li>
+                    <h3>{country.name}</h3>
+                </li>
+            })}
+        </ul>
+    </div>
+}
+...............................................End...........................................
